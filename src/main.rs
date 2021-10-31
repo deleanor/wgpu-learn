@@ -7,10 +7,17 @@ use winit::event_loop::ControlFlow;
 use winit::event_loop::EventLoop;
 use winit::window::WindowBuilder;
 
+mod render;
+
 fn main() {
     env_logger::init();
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
+
+    let render_state: render::RenderState 
+        = pollster::block_on(render::RenderState::new(&window));
+
+    println!("Using device {}", render_state.adapter.get_info().name);
 
     event_loop.run(move |event, _, control_flow| match event {
         Event::WindowEvent {
