@@ -14,27 +14,35 @@ fn main() {
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
 
-    let render_state: render::RenderState 
-        = pollster::block_on(render::RenderState::new(&window));
+    match pollster::block_on(render::RenderState::new(&window)) {
+        Ok(render_state) => {
+            println!(
+                "Using device {} ({:?})",
+                render_state.adapter.get_info().name,
+                render_state.adapter.get_info().device_type);
 
-    println!("Using device {}", render_state.adapter.get_info().name);
-
-    event_loop.run(move |event, _, control_flow| match event {
-        Event::WindowEvent {
-            ref event,
-            window_id
-        } if window_id == window.id() => match event {
-            WindowEvent::CloseRequested |
-            WindowEvent::KeyboardInput {
-                input: KeyboardInput {
-                    state: ElementState::Pressed,
-                    virtual_keycode: Some(VirtualKeyCode::Escape),
-                    ..
-                },
-                ..
-            } => *control_flow = ControlFlow::Exit,
-            _ => {}
+            event_loop.run(move |event, _, control_flow| match event {
+                Event::WindowEvent {
+                    ref event,
+                    window_id
+                } if window_id == window.id() => match event {
+                    WindowEvent::CloseRequested |
+                    WindowEvent::KeyboardInput {
+                        input: KeyboardInput {
+                            state: ElementState::Pressed,
+                            virtual_keycode: Some(VirtualKeyCode::Escape),
+                            ..
+                        },
+                        ..
+                    } => *control_flow = ControlFlow::Exit,
+                    _ => {}
+                }
+                _ => {}
+            });
+        },
+        Err(reason) => {
+            println!("Failed to initialize rendering: {}", reason);
+            std::process::exit(1);
         }
-        _ => {}
-    });
+    }
 }

@@ -8,7 +8,7 @@ pub struct RenderState {
 }
 
 impl RenderState {
-    pub async fn new(window: &winit::window::Window) -> Self {
+    pub async fn new(window: &winit::window::Window) -> Result<Self, String> {
         let size = window.inner_size();
 
         let instance = wgpu::Instance::new(wgpu::Backends::all());
@@ -39,13 +39,14 @@ impl RenderState {
         };
         surface.configure(&device, &config);
 
-        Self {
+        Ok(Self {
             surface,
             adapter,
             device,
             queue,
             config,
             size
-        }
+        })
     }
+
 }
