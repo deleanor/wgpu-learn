@@ -19,7 +19,7 @@ impl RenderState {
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false
             }
-        ).await.unwrap();
+        ).await.ok_or("Failed to create adapter.")?;
 
         let (device, queue) = adapter.request_device(
             &wgpu::DeviceDescriptor {
@@ -28,7 +28,7 @@ impl RenderState {
                 label: None
             },
             None
-        ).await.unwrap();
+        ).await.map_err(|_| "Failed to obtain device.")?;
 
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
